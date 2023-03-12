@@ -1,3 +1,6 @@
+import shopImg from "./assets/shop.png";
+import groundImg from "./assets/ground.png";
+
 export const geojson = {
   type: "FeatureCollection",
   features: [
@@ -5,6 +8,7 @@ export const geojson = {
       type: "Feature",
       properties: {
         name: "Canteen",
+        img: shopImg,
       },
       geometry: {
         coordinates: [76.14879830179615, 10.565728252172477],
@@ -16,6 +20,7 @@ export const geojson = {
       type: "Feature",
       properties: {
         name: "IES Boys Hostel",
+        img: groundImg,
       },
       geometry: {
         coordinates: [76.1476337217502, 10.56560309104529],
@@ -27,6 +32,7 @@ export const geojson = {
       type: "Feature",
       properties: {
         name: "IES Girls Hostel",
+        img: shopImg,
       },
       geometry: {
         coordinates: [76.14901674411391, 10.563701079706291],

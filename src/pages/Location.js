@@ -6,7 +6,7 @@ import shopImg from "../assets/shop.png";
 
 import socketIO from "socket.io-client";
 
-const socket = socketIO.connect(process.env.REACT_APP_API_URL);
+const socket = socketIO.connect("https://location-share-backend.onrender.com");
 
 const Location = () => {
   const [isLocationFound, setIsLocationFound] = useState(false);
@@ -126,7 +126,7 @@ const Location = () => {
               />
             )}
             <img
-              src={shopImg}
+              src={mkr.properties.img}
               alt=""
               style={{ width: "100px", height: "100px" }}
             />
