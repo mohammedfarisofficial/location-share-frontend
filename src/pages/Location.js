@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Map, { Marker, Popup } from "react-map-gl";
 import { useLocation } from "react-router-dom";
-import { geojson } from "../data";
+import { geojson, buildingBaseGeojson } from "../data";
 import shopImg from "../assets/shop.png";
 
 import socketIO from "socket.io-client";
@@ -19,7 +19,7 @@ const Location = () => {
   const location = useLocation();
 
   const uploadLocation = () => {
-    navigator.geolocation.getCurrentPosition(
+    navigator.geolocation.watchPosition(
       (position) => {
         if (name) {
           // setLat(position.coords.latitude);
