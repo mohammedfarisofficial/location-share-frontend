@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from "react";
 import Map, { Marker, Popup } from "react-map-gl";
 import { useLocation } from "react-router-dom";
-import { geojson, buildingBaseGeojson } from "../data";
-import shopImg from "../assets/shop.png";
+import { geojson } from "../data";
 
 import socketIO from "socket.io-client";
 
-const socket = socketIO.connect("https://location-share-backend.onrender.com");
-
+const socket = socketIO.connect(process.env.REACT_APP_API_URL);
 const Location = () => {
   const [isLocationFound, setIsLocationFound] = useState(false);
   const [popup, setPopup] = useState(false);
@@ -21,9 +19,8 @@ const Location = () => {
   const uploadLocation = () => {
     navigator.geolocation.watchPosition(
       (position) => {
+        console.log("changing");
         if (name) {
-          // setLat(position.coords.latitude);
-          // setLng(position.coords.longitude);
           socket.emit("position", {
             data: {
               name: name,
@@ -37,7 +34,7 @@ const Location = () => {
       { enableHighAccuracy: true, timeout: 20000, distanceFilter: 10 }
     );
     socket.on("otherPositions", (friendsData) => {
-      console.log(friendsData.latitude);
+      console.log(friendsData.name + " changing " + friendsData.latitude);
       let friendsArr = [...friends];
       const friend = friendsArr.filter((fnd) => fnd.name === friendsData.name);
       if (friends.length !== 0) {
