@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Map, { Marker, Popup } from "react-map-gl";
 import { useLocation } from "react-router-dom";
 import { geojson } from "../data";
+import * as turf from "@turf/turf";
 
 import socketIO from "socket.io-client";
 
@@ -9,48 +10,46 @@ const socket = socketIO.connect(process.env.REACT_APP_API_URL);
 const Location = () => {
   const [isLocationFound, setIsLocationFound] = useState(false);
   const [popup, setPopup] = useState(false);
-  const [lat, setLat] = useState("");
-  const [lng, setLng] = useState("");
   const [name, setName] = useState("");
   const [friends, setFriends] = useState([]);
 
   const location = useLocation();
 
-  const uploadLocation = () => {
-    navigator.geolocation.watchPosition(
-      (position) => {
-        console.log("changing");
-        if (name) {
-          socket.emit("position", {
-            data: {
-              name: name,
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            },
-          });
-        }
-      },
-      (error) => console.log(error),
-      { enableHighAccuracy: true, timeout: 20000, distanceFilter: 10 }
-    );
-    socket.on("otherPositions", (friendsData) => {
-      console.log(friendsData.name + " changing " + friendsData.latitude);
-      let friendsArr = [...friends];
-      const friend = friendsArr.filter((fnd) => fnd.name === friendsData.name);
-      if (friends.length !== 0) {
-        friend[0].latitude = friendsData.latitude;
-        friend[0].longitude = friendsData.longitude;
-        const newFriends = friends.map((fnd) => {
-          if (fnd.name === friendsData?.name) {
-            return friend[0];
-          }
-          return fnd;
-        });
-        setFriends(newFriends);
-      }
-      // setIsLocationFound(true);
-    });
+  let lng = 10.564532005786141,
+    lat = 76.14821915860668;
+
+  const polygonCoordinatesOfCollege = [
+    [
+      [10.5626989859838, 76.14832368179236],
+      [10.562800554327566, 76.14901462836315],
+      [10.563384571652804, 76.1490985751422],
+      [10.563892411902685, 76.15017051094594],
+      [10.56591106859537, 76.15037069172831],
+      [10.566038027692187, 76.14926001125741],
+      [10.5657523696499, 76.14910503258676],
+      [10.566431600559568, 76.1471936289878],
+      [10.562844990467013, 76.14706448009525],
+      [10.5626989859838, 76.14832368179236],
+    ],
+  ];
+
+  //check inside polygon
+
+  const inOut = (point, polygon) => {
+    if (turf.booleanPointInPolygon(point, polygon)) {
+      console.log("User is inside the polygon");
+    } else {
+      console.log("User is outside the polygon");
+    }
   };
+
+  const point = turf.point([lng, lat]);
+  const polygon = turf.polygon(polygonCoordinatesOfCollege);
+
+  inOut(point, polygon);
+
+  //end
+
   const prevLocation = async () => {
     try {
       const response = await fetch(
@@ -64,6 +63,50 @@ const Location = () => {
       console.log(err);
     }
   };
+
+  const uploadLocation = () => {
+    navigator.geolocation.watchPosition(
+      (position) => {
+        // console.log("you're changing");
+        if (name) {
+          socket.emit("position", {
+            data: {
+              name: name,
+              lat: position.coords.latitude,
+              lng: position.coords.longitude,
+            },
+          });
+        }
+      },
+      (error) => console.log(error),
+      { enableHighAccuracy: true }
+    );
+  };
+
+  const positionUpdate = () => {
+    socket.on("positionUpdate", (data) => {
+      console.log(data.fullDocument);
+      let friendsArr = [...friends];
+      const friend = friendsArr.filter(
+        (fnd) => fnd.name === data.fullDocument.name
+      );
+      if (friends.length !== 0) {
+        friend[0].latitude = data.fullDocument.latitude;
+        friend[0].longitude = data.fullDocument.longitude;
+        const newFriends = friends.map((fnd) => {
+          if (fnd.name === data.fullDocument?.name) {
+            return friend[0];
+          }
+          return fnd;
+        });
+        setFriends(newFriends);
+      }
+    });
+  };
+  useEffect(() => {
+    positionUpdate();
+  }, []);
+
   useEffect(() => {
     prevLocation();
   }, []);
@@ -72,6 +115,10 @@ const Location = () => {
     setName(location.state?.data);
     uploadLocation();
   }, [name, location.state]);
+
+  useEffect(() => {
+    inOut(point, polygon);
+  }, []);
 
   return (
     <div style={{ width: "100%", height: "100vh" }}>
@@ -84,12 +131,6 @@ const Location = () => {
           zoom: 10,
         }}
       >
-        {/* {renderMarker()} */}
-        {/* <Source id="my-data" type="geojson" data={geojson}>
-          <Layer {...layerStyle}>
-            <h2>hello</h2>
-          </Layer>
-        </Source> */}
         {lat && lng !== "" && (
           <Marker
             longitude={lng}
@@ -97,11 +138,7 @@ const Location = () => {
             offsetLeft={-20}
             offsetTop={-10}
             onClick={() => setPopup(!popup)}
-          >
-            {/* <Popup anchor="top" longitude={lng} latitude={lat}>
-              <h2>{name}</h2>
-            </Popup> */}
-          </Marker>
+          ></Marker>
         )}
         {geojson.features.map((mkr, i) => (
           <Marker
