@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import Map, { Marker, Popup } from "react-map-gl";
+import Map, { Marker, Popup, Source, Layer } from "react-map-gl";
 import { useLocation } from "react-router-dom";
-import { geojson } from "../data";
+import { geojson, iesLayout } from "../data";
 import * as turf from "@turf/turf";
 
 import socketIO from "socket.io-client";
@@ -120,17 +120,31 @@ const Location = () => {
     inOut(point, polygon);
   }, []);
 
+  //custome polygons
+  const layer = {
+    id: "polygon",
+    type: "fill",
+    source: "my-data",
+    layout: {},
+    paint: {
+      "fill-color": "#374ace",
+      "fill-opacity": 1,
+    },
+  };
   return (
     <div style={{ width: "100%", height: "100vh" }}>
       <Map
-        mapStyle="mapbox://styles/mohammedfarisofficial1/cldq4mkps000e01qmtotbkp0k"
+        mapStyle="mapbox://styles/mohammedfarisofficial1/clfgrkcas000801qxj8qp9reg"
         mapboxAccessToken={process.env.REACT_APP_MAPBOX_ACCESS}
         initialViewState={{
           longitude: 76.15003079543125,
           latitude: 10.565125222484612,
-          zoom: 10,
+          zoom: 17,
         }}
       >
+        <Source id="my-data" type="geojson" data={iesLayout}>
+          <Layer {...layer} />
+        </Source>
         {lat && lng !== "" && (
           <Marker
             longitude={lng}
