@@ -37,7 +37,7 @@ const Location = () => {
 
   const inOut = (point, polygon) => {
     if (turf.booleanPointInPolygon(point, polygon)) {
-      console.log("User is inside the polygon");
+      // console.log("User is inside the polygon");
     } else {
       console.log("User is outside the polygon");
     }
@@ -85,12 +85,12 @@ const Location = () => {
 
   const positionUpdate = () => {
     socket.on("positionUpdate", (data) => {
-      console.log(data.fullDocument);
       let friendsArr = [...friends];
       const friend = friendsArr.filter(
         (fnd) => fnd.name === data.fullDocument.name
       );
-      if (friends.length !== 0) {
+      if (isLocationFound) {
+        console.log(friend[0]);
         friend[0].latitude = data.fullDocument.latitude;
         friend[0].longitude = data.fullDocument.longitude;
         const newFriends = friends.map((fnd) => {
@@ -100,16 +100,22 @@ const Location = () => {
           return fnd;
         });
         setFriends(newFriends);
+        console.log(friends);
       }
     });
   };
-  useEffect(() => {
-    positionUpdate();
-  }, []);
 
   useEffect(() => {
     prevLocation();
   }, []);
+
+  // useEffect(() => {
+  //   console.log(friends);
+  // }, [friends]);
+
+  useEffect(() => {
+    positionUpdate();
+  }, [friends]);
 
   useEffect(() => {
     setName(location.state?.data);
@@ -152,7 +158,7 @@ const Location = () => {
             offsetLeft={-20}
             offsetTop={-10}
             onClick={() => setPopup(!popup)}
-          ></Marker>
+          />
         )}
         {geojson.features.map((mkr, i) => (
           <Marker
