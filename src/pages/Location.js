@@ -67,7 +67,6 @@ const Location = () => {
   const uploadLocation = () => {
     navigator.geolocation.watchPosition(
       (position) => {
-        // console.log("you're changing");
         if (name) {
           socket.emit("position", {
             data: {
@@ -108,11 +107,6 @@ const Location = () => {
   useEffect(() => {
     prevLocation();
   }, []);
-
-  // useEffect(() => {
-  //   console.log(friends);
-  // }, [friends]);
-
   useEffect(() => {
     positionUpdate();
   }, [friends]);
@@ -124,7 +118,7 @@ const Location = () => {
 
   useEffect(() => {
     inOut(point, polygon);
-  }, []);
+  }, [point, polygon]);
 
   //custome polygons
   const layer = {
@@ -137,6 +131,7 @@ const Location = () => {
       "fill-opacity": 1,
     },
   };
+  console.log("rendering component");
   return (
     <div style={{ width: "100%", height: "100vh" }}>
       <Map
@@ -195,7 +190,6 @@ const Location = () => {
                 offsetLeft={-20}
                 offsetTop={-10}
                 draggable={true}
-                //   onDrag={uploadLocation}
               />
               <Popup
                 anchor="top"
