@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import Map, { Marker, Popup, Source, Layer } from "react-map-gl";
 import { useLocation } from "react-router-dom";
-import { geojson, iesLayout } from "../data";
+import { geojson, iesLayout, iesRoads } from "../data";
 import * as turf from "@turf/turf";
 
 import socketIO from "socket.io-client";
 
 const socket = socketIO.connect(process.env.REACT_APP_API_URL);
+
 const Location = () => {
   const [isLocationFound, setIsLocationFound] = useState(false);
   const [popup, setPopup] = useState(false);
@@ -60,6 +61,19 @@ const Location = () => {
       const data = await response.json();
       setFriends(data.users);
       setIsLocationFound(true);
+
+      // Create a new array of markers based on the updated friends state
+      // const newMarkers = data.users.map((friend) => (
+      //   <Marker
+      //     key={friend.name}
+      //     longitude={friend.longitude}
+      //     latitude={friend.latitude}
+      //     offsetLeft={-20}
+      //     offsetTop={-10}
+      //     onClick={() => setPopup(!popup)}
+      //   />
+      // ));
+      // setMarkers(newMarkers);
       console.log("default location rendered from db!");
     } catch (err) {
       console.log(err);
@@ -146,6 +160,17 @@ const Location = () => {
       "fill-opacity": 1,
     },
   };
+  const groundLayer = {
+    id: "polygon",
+    type: "fill",
+    source: "my-roads-data",
+    layout: {},
+    paint: {
+      "fill-color": "#374ace",
+      "fill-opacity": 1,
+    },
+  };
+
   console.log("rendering component");
   return (
     <div style={{ width: "100%", height: "100vh" }}>
@@ -158,8 +183,11 @@ const Location = () => {
           zoom: 17,
         }}
       >
-        <Source id="my-data" type="geojson" data={iesLayout}>
+        {/* <Source id="my-data" type="geojson" data={iesLayout}>
           <Layer {...layer} />
+        </Source> */}
+        <Source id="my-roads-data" type="geojson" data={iesRoads}>
+          <Layer {...groundLayer} />
         </Source>
         {lat && lng !== "" && (
           <Marker
