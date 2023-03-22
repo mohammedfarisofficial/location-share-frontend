@@ -1,16 +1,21 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import "./home.css";
 
 const Home = () => {
   const [name, setName] = useState("");
   return (
-    <>
-      <div>Home</div>
-      <input type="text" onChange={(e) => setName(e.target.value)} />
+    <div className="home-container">
+      <input
+        className="input-container"
+        type="text"
+        placeholder="Enter the name"
+        onChange={(e) => setName(e.target.value)}
+      />
       <Link to={"/location"} state={{ data: name }}>
-        click here to open
+        <button>Enter</button>
       </Link>
-    </>
+    </div>
   );
 };
 
