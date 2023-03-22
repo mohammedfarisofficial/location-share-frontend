@@ -13,6 +13,8 @@ const Location = () => {
   const [name, setName] = useState("");
   const [friends, setFriends] = useState([]);
 
+  const [markers, setMarkers] = useState([]);
+
   const location = useLocation();
 
   let lng = 10.564532005786141,
@@ -100,6 +102,19 @@ const Location = () => {
         });
         setFriends(newFriends);
         console.log(friends);
+
+        // Create a new array of markers based on the updated friends state
+        const newMarkers = newFriends.map((friend) => (
+          <Marker
+            key={friend.name}
+            longitude={friend.longitude}
+            latitude={friend.latitude}
+            offsetLeft={-20}
+            offsetTop={-10}
+            onClick={() => setPopup(!popup)}
+          />
+        ));
+        setMarkers(newMarkers);
       }
     });
   };
@@ -181,7 +196,7 @@ const Location = () => {
             />
           </Marker>
         ))}
-        {isLocationFound &&
+        {/* {isLocationFound &&
           friends.map((data, i) => (
             <div key={i}>
               <Marker
@@ -199,7 +214,8 @@ const Location = () => {
                 <h2>{data?.name}</h2>
               </Popup>
             </div>
-          ))}
+          ))} */}
+        {markers}
       </Map>
     </div>
   );
