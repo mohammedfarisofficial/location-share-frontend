@@ -188,12 +188,12 @@ const Location = () => {
           zoom: 17,
         }}
       >
-        {/* <Source id="my-data" type="geojson" data={iesLayout}>
+        <Source id="my-data" type="geojson" data={iesLayout}>
           <Layer {...layer} />
-        </Source> */}
-        <Source id="my-roads-data" type="geojson" data={iesRoads}>
-          <Layer {...groundLayer} />
         </Source>
+        {/* <Source id="my-roads-data" type="geojson" data={iesRoads}>
+          <Layer {...groundLayer} />
+        </Source> */}
         {lat && lng !== "" && (
           <Marker
             longitude={lng}
