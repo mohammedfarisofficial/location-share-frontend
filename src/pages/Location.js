@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import Map, { Marker, Popup, Source, Layer } from "react-map-gl";
+import React, { useEffect, useRef, useState } from "react";
+import Map, { Marker, Popup, Source, Layer, useMap } from "react-map-gl";
 import { useLocation } from "react-router-dom";
 import { geojson, iesLayout, iesRoads } from "../data";
 import * as turf from "@turf/turf";
@@ -13,6 +13,7 @@ const Location = () => {
   const [popup, setPopup] = useState(false);
   const [name, setName] = useState("");
   const [friends, setFriends] = useState([]);
+  const mapRef = useRef(null);
 
   const [markers, setMarkers] = useState([]);
 
@@ -118,6 +119,9 @@ const Location = () => {
         console.log(friends);
 
         // Create a new array of markers based on the updated friends state
+        const markerHandler = (lat, lng) => {
+          mapRef.current.flyTo({ center: [lng, lat], duration: 1000 });
+        };
         const newMarkers = newFriends.map((friend) => (
           <Marker
             key={friend.name}
@@ -125,7 +129,7 @@ const Location = () => {
             latitude={friend.latitude}
             offsetLeft={-20}
             offsetTop={-10}
-            onClick={() => setPopup(!popup)}
+            onClick={() => markerHandler(friend.latitude, friend.longitude)}
           />
         ));
         setMarkers(newMarkers);
@@ -175,6 +179,7 @@ const Location = () => {
   return (
     <div style={{ width: "100%", height: "100vh" }}>
       <Map
+        ref={mapRef}
         mapStyle="mapbox://styles/mohammedfarisofficial1/clfgrkcas000801qxj8qp9reg"
         mapboxAccessToken={process.env.REACT_APP_MAPBOX_ACCESS}
         initialViewState={{
