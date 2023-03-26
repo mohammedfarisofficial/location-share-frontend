@@ -15,6 +15,9 @@ const Home = () => {
       <Link to={"/location"} state={{ data: name }}>
         <button>Enter</button>
       </Link>
+      <Link to={"/status"}>
+        <button>Status</button>
+      </Link>
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import Map, { Marker, Popup, Source, Layer, useMap } from "react-map-gl";
+import Map, { Marker, Source, Layer } from "react-map-gl";
 import { useLocation } from "react-router-dom";
 import { geojson, iesLayout, iesRoads } from "../data";
 import * as turf from "@turf/turf";
@@ -62,19 +62,6 @@ const Location = () => {
       const data = await response.json();
       setFriends(data.users);
       setIsLocationFound(true);
-
-      // Create a new array of markers based on the updated friends state
-      // const newMarkers = data.users.map((friend) => (
-      //   <Marker
-      //     key={friend.name}
-      //     longitude={friend.longitude}
-      //     latitude={friend.latitude}
-      //     offsetLeft={-20}
-      //     offsetTop={-10}
-      //     onClick={() => setPopup(!popup)}
-      //   />
-      // ));
-      // setMarkers(newMarkers);
       console.log("default location rendered from db!");
     } catch (err) {
       console.log(err);
