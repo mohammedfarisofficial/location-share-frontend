@@ -1,8 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
-import Map, { Marker, Source, Layer } from "react-map-gl";
+import { useEffect, useRef, useState } from "react";
+import Map, { Marker, Source, Layer, LngLat } from "react-map-gl";
 import { useLocation } from "react-router-dom";
-import { geojson, iesLayout, iesRoads } from "../data";
+import { geojson, iesLayout, collgeOutLine } from "../data";
 import * as turf from "@turf/turf";
+import tree from "../assets/tree.png";
 
 import socketIO from "socket.io-client";
 
@@ -17,10 +18,29 @@ const Location = () => {
 
   const [markers, setMarkers] = useState([]);
 
+  const handleMapLoad = () => {
+    const map = mapRef.current.getMap();
+
+    map.loadImage(tree, (error, image) => {
+      if (error) throw error;
+      map.addImage("my-icon", image);
+    });
+  };
+
+  const [viewState, setViewState] = useState({
+    minZoom: 1,
+    maxZoom: 20,
+    longitude: 76.15003079543125,
+    latitude: 10.565125222484612,
+    zoom: 17,
+  });
+
   const location = useLocation();
 
   let lng = 10.564532005786141,
     lat = 76.14821915860668;
+
+  // const markerScale = Math.max(1 - (viewState.zoom - 10) / 20, 0.2);
 
   const polygonCoordinatesOfCollege = [
     [
@@ -51,8 +71,6 @@ const Location = () => {
   const polygon = turf.polygon(polygonCoordinatesOfCollege);
 
   inOut(point, polygon);
-
-  //end
 
   const prevLocation = async () => {
     try {
@@ -103,21 +121,35 @@ const Location = () => {
           return fnd;
         });
         setFriends(newFriends);
-        console.log(friends);
 
-        // Create a new array of markers based on the updated friends state
         const markerHandler = (lat, lng) => {
           mapRef.current.flyTo({ center: [lng, lat], duration: 1000 });
+          const currentUser = newFriends.filter((user) => user.name === name);
+          const currentUserPoint = turf.point([
+            currentUser[0].latitude,
+            currentUser[0].longitude,
+          ]);
+          const friendPoint = turf.point([lat, lng]);
+          const distanceBetweeen = turf.distance(
+            currentUserPoint,
+            friendPoint,
+            { units: "meters" }
+          );
+          alert(distanceBetweeen.toFixed(2) + "m distance");
+
+          // console.log("this is clicked");
         };
+        // Create a new array of markers based on the updated friends state
         const newMarkers = newFriends.map((friend) => (
           <Marker
-            key={friend.name}
+            key={friend._id}
             longitude={friend.longitude}
             latitude={friend.latitude}
             offsetLeft={-20}
             offsetTop={-10}
             onClick={() => markerHandler(friend.latitude, friend.longitude)}
-          />
+            anchor="bottom"
+          ></Marker>
         ));
         setMarkers(newMarkers);
       }
@@ -141,23 +173,13 @@ const Location = () => {
   }, [point, polygon]);
 
   //custome polygons
-  const layer = {
-    id: "polygon",
-    type: "fill",
-    source: "my-data",
-    layout: {},
-    paint: {
-      "fill-color": "#374ace",
-      "fill-opacity": 1,
-    },
-  };
   const groundLayer = {
-    id: "polygon",
+    id: "college-base",
     type: "fill",
     source: "my-roads-data",
     layout: {},
     paint: {
-      "fill-color": "#374ace",
+      "fill-color": "#788D5D",
       "fill-opacity": 1,
     },
   };
@@ -166,21 +188,17 @@ const Location = () => {
   return (
     <div style={{ width: "100%", height: "100vh" }}>
       <Map
+        {...viewState}
+        onMove={(evt) => setViewState(evt.viewState)}
+        onLoad={handleMapLoad}
         ref={mapRef}
         mapStyle="mapbox://styles/mohammedfarisofficial1/clfgrkcas000801qxj8qp9reg"
         mapboxAccessToken={process.env.REACT_APP_MAPBOX_ACCESS}
-        initialViewState={{
-          longitude: 76.15003079543125,
-          latitude: 10.565125222484612,
-          zoom: 17,
-        }}
       >
-        <Source id="my-data" type="geojson" data={iesLayout}>
-          <Layer {...layer} />
-        </Source>
-        {/* <Source id="my-roads-data" type="geojson" data={iesRoads}>
+        <Source id="college-base" type="geojson" data={collgeOutLine}>
           <Layer {...groundLayer} />
-        </Source> */}
+        </Source>
+
         {lat && lng !== "" && (
           <Marker
             longitude={lng}
@@ -190,51 +208,6 @@ const Location = () => {
             onClick={() => setPopup(!popup)}
           />
         )}
-        {geojson.features.map((mkr, i) => (
-          <Marker
-            key={i}
-            longitude={mkr.geometry.coordinates[0]}
-            latitude={mkr.geometry.coordinates[1]}
-            offsetLeft={-20}
-            offsetTop={-10}
-            onClick={() => setPopup(!popup)}
-          >
-            {popup && (
-              <div
-                style={{
-                  width: "200px",
-                  height: "300px",
-                  backgroundColor: "white",
-                  borderRadius: 20,
-                }}
-              />
-            )}
-            <img
-              src={mkr.properties.img}
-              alt=""
-              style={{ width: "100px", height: "100px" }}
-            />
-          </Marker>
-        ))}
-        {/* {isLocationFound &&
-          friends.map((data, i) => (
-            <div key={i}>
-              <Marker
-                longitude={data?.longitude}
-                latitude={data?.latitude}
-                offsetLeft={-20}
-                offsetTop={-10}
-                draggable={true}
-              />
-              <Popup
-                anchor="top"
-                longitude={data?.longitude}
-                latitude={data?.latitude}
-              >
-                <h2>{data?.name}</h2>
-              </Popup>
-            </div>
-          ))} */}
         {markers}
       </Map>
     </div>
